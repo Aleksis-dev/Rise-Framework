@@ -1,0 +1,13 @@
+<?php
+
+require_once __DIR__ . "/App/autoload/Autoloader.php";
+
+use App\Rise\Core\CLI\Rise;
+
+$rise = new Rise();
+
+if ($argc-1 == 0) {
+    exit(0);
+}
+
+call_user_func([$rise, $argv[1]], (array_slice($argv, 2)));
