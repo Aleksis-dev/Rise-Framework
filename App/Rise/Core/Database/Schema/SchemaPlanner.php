@@ -13,10 +13,10 @@ class SchemaPlanner {
 
         $str = str_replace("[name]", $tableName . "_id", $str);
 
-        echo "CREATE TABLE {$tableName}_table " . "(\n" . $str . ")";
+        return "CREATE TABLE {$tableName}_table " . "(\n" . $str . ")";
     }  
 
     public static function dropTable(string $tableName) {
-        $str = "DROP TABLE IF EXISTS {$tableName}_table";
+        return "DROP TABLE IF EXISTS {$tableName}_table";
     }
 }

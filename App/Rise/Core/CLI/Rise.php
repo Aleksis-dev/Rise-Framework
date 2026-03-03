@@ -4,44 +4,53 @@ namespace App\Rise\Core\CLI;
 
 use App\Rise\Core\Helpers\Files\Searching\SearchFile;
 use App\Rise\Core\Database\Execution\PDO\PDOConnection;
-use App\Rise\Core\Database\Execution\PDO\PDOStatements;
-
+use App\Rise\Core\Database\Execution\Queries\QueryExecutor;
 use App\env;
 
-class Rise {
 
-    public string $defaultDir;
+class Rise {
+    private string $defaultDir;
+    private env $env;
+    private PDOConnection $dbh;
 
     public function __construct() {
         $this->defaultDir = new SearchFile("")->search();
+        $this->env = new env();
+        $this->dbh = new PDOConnection($this->env->DB_CONNECTION, $this->env->DB_NAME, $this->env->DB_HOST, $this->env->DB_PORT, $this->env->DB_USERNAME, $this->env->DB_PASSWORD);
     }
 
     public function migrate() {
         $dir = $this->defaultDir . "/Database/Migrations";
         $scannedObjects = scandir($dir);
         $scannedObjects = array_slice($scannedObjects, 2);
+
+        echo "Running Migrations...\n\n";
         
         foreach ($scannedObjects as $key => $scannedObject) {
-            $className = "App\\Database\\Migrations\\" . str_replace(".php", "", $scannedObject);
+            $scannedName = str_replace(".php", "", $scannedObject);
+            $className = "App\\Database\\Migrations\\" . $scannedName;
             $obj = new $className();
-            call_user_func([$obj, "up"]);
+
+            $stmt = call_user_func([$obj, "up"]);
+            $result = QueryExecutor::execute($this->dbh, $stmt);
+
+            $response = is_bool($result) ? "---- {$scannedName} migrated successfully.\n" : $result . "\n"; 
+            $shouldExit = !is_bool($result);
+
+            echo $response;
+
+            if ($shouldExit) {
+                exit(1);
+            }
         }
+
+        echo "\nMigrations successfully completed.";
     }
 
     public function serve() {
         $file = dirname($this->defaultDir) . '/Public/Index.php';
 
         shell_exec("php -S localhost:8000 {$file}");
-    }
-
-    public function test() {
-        $env = new env();
-        $dbh = new PDOConnection($env->DB_CONNECTION, $env->DB_NAME, $env->DB_HOST, $env->DB_PORT, $env->DB_USERNAME, $env->DB_PASSWORD);
-
-        $sth = $dbh->prepare("SELECT 1 AS test_value");
-        $sth->execute();
-        $result = $sth->fetch();
-        echo $result->test_value;
     }
 
     public function __call(string $name, array $args) {
