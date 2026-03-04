@@ -9,7 +9,9 @@ class user_migration_02_03_2026 {
     public function up(): string {
         return SchemaPlanner::createTable("user", function(TableConstructor $table) {
             $table->id()
-            ->float('amount');
+            ->tinytext("name")
+            ->password()
+            ->int_unsigned("coins");
         });
     }
 
