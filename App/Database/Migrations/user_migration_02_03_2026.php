@@ -11,7 +11,7 @@ class user_migration_02_03_2026 {
             $table->id()
             ->tinytext("name")
             ->password()
-            ->int_unsigned("coins");
+            ->int_unsigned_not_null("coins");
         });
     }
 

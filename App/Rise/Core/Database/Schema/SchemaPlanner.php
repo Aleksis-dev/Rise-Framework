@@ -7,6 +7,8 @@ class SchemaPlanner {
     public static function createTable(string $tableName, callable $callback) {
         $table = new TableConstructor();
 
+        $tableName = strtolower($tableName);
+
         $callback($table);
 
         $str = implode(",\n", $table->getQuery());

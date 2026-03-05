@@ -7,14 +7,13 @@ use App\Api\Models\User;
 class TestController {
     public function index() {
         return json_encode([
-            "Hello, World!"
+            "users" => User::all()
         ]);
     }
 
     public function user(User $user) {
         return json_encode([
-            "username" => $user->username,
-            "password" => $user->password
+            "user" => $user
         ]);
     }
 

@@ -35,4 +35,4 @@ if (!$finalizedRoute) {
 $controller = new $finalizedRoute[0];
 $method = $finalizedRoute[1];
 
-echo call_user_func([$controller, $method], (User::create(["username" => "Aleksis", "password" => "my_very_secure_password"])));
+echo call_user_func([$controller, $method], (User::create(["name" => "Aleksis", "password" => "my_very_secure_password", "coins" => 0])));

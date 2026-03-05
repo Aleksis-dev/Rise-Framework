@@ -3,20 +3,17 @@
 namespace App\Rise\Core\CLI;
 
 use App\Rise\Core\Helpers\Files\Searching\SearchFile;
-use App\Rise\Core\Database\Execution\PDO\PDOConnection;
+use App\Rise\Core\Database\Execution\PDO\PDOEntry;
 use App\Rise\Core\Database\Execution\Queries\QueryExecutor;
-use App\env;
-
+use App\Rise\Core\Database\Execution\PDO\PDOConnection;
 
 class Rise {
     private string $defaultDir;
-    private env $env;
     private PDOConnection $dbh;
 
     public function __construct() {
         $this->defaultDir = new SearchFile("")->search();
-        $this->env = new env();
-        $this->dbh = new PDOConnection($this->env->DB_CONNECTION, $this->env->DB_NAME, $this->env->DB_HOST, $this->env->DB_PORT, $this->env->DB_USERNAME, $this->env->DB_PASSWORD);
+        $this->dbh = new PDOEntry()->dbh;
     }
 
     public function migrate() {
@@ -32,16 +29,15 @@ class Rise {
             $obj = new $className();
 
             $stmt = call_user_func([$obj, "up"]);
-            $result = QueryExecutor::execute($this->dbh, $stmt);
+            $queryResponse = QueryExecutor::execNonTransactional($this->dbh, $stmt);
 
-            $response = is_bool($result) ? "---- {$scannedName} migrated successfully.\n" : $result . "\n"; 
-            $shouldExit = !is_bool($result);
-
-            echo $response;
-
-            if ($shouldExit) {
+            if (isset($queryResponse["error"])) {
+                print_r($queryResponse["error"]);
                 exit(1);
             }
+
+            $response = "---- {$scannedName} migrated successfully.\n";
+            echo $response;
         }
 
         echo "\nMigrations successfully completed.";
@@ -60,16 +56,15 @@ class Rise {
             $obj = new $className();
 
             $stmt = call_user_func([$obj, "down"]);
-            $result = QueryExecutor::execute($this->dbh, $stmt);
+            $queryResponse = QueryExecutor::execNonTransactional($this->dbh, $stmt);
 
-            $response = is_bool($result) ? "---- {$scannedName} dropped successfully.\n" : $result . "\n"; 
-            $shouldExit = !is_bool($result);
-
-            echo $response;
-
-            if ($shouldExit) {
+            if (isset($queryResponse["error"])) {
+                print_r($queryResponse["error"]);
                 exit(1);
             }
+
+            $response = "---- {$scannedName} dropped successfully.\n";
+            echo $response;
         }
 
         echo "\nTables dropped successfully.";
