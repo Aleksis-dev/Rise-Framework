@@ -26,7 +26,7 @@ class TableConstructor {
     }
 
     public function id(string $id = "[name]") {
-        $this->tableQuery[] = "$id INT AUTO_INCREMENT";
+        $this->tableQuery[] = "$id BIGINT AUTO_INCREMENT";
         $this->tableQuery[] = "PRIMARY KEY ($id)";
         return $this;
     }
@@ -39,6 +39,12 @@ class TableConstructor {
             $precision = $precision ? "({$precision})" : "";
             $this->tableQuery[] = "{$name} DATETIME{$precision}";
         }
+    }
+
+    public function morph(string $name) {
+        $this->tableQuery[] = "{$name}_type VARCHAR(255)";
+        $this->tableQuery[] = "{$name}_id BIGINT UNSIGNED";
+        return $this;
     }
 
     public function __call(string $name, array $args) {

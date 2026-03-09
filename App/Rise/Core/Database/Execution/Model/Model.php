@@ -8,6 +8,13 @@ use stdClass;
 class Model extends stdClass {
 
     protected $fillable;
+    protected $hidden;
+
+    private $privateModel;
+
+    public function __get(string $name) {
+        return $this->privateModel->{$name};
+    }
 
     public static function all() {
         $class = get_called_class();
@@ -102,6 +109,15 @@ class Model extends stdClass {
 
         $initializedObject->created_at = $createdAt ? str_replace(" ", "T", $createdAt) . "Z" : null;
         $initializedObject->updated_at = $updated_at ? str_replace(" ", "T", $updated_at) . "Z" : null;
+
+        $initializedObject->privateModel = new StdClass();
+
+        foreach ($initializedObject->hidden as $hidden) {
+            if (isset($initializedObject->{$hidden})) {
+                $initializedObject->privateModel->{$hidden} = $initializedObject->{$hidden};
+                unset($initializedObject->{$hidden});
+            }
+        }
 
         return $initializedObject;
     }

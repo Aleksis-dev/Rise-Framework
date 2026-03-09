@@ -9,4 +9,8 @@ class User extends Model {
         "password",
         "coins"
     ];
+
+    protected $hidden = [
+        "password"
+    ];
 }
