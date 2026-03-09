@@ -6,13 +6,30 @@ require_once dirname(__DIR__) . "/App/autoload/Autoloader.php";
 
 use App\Config\RouteLinker;
 use App\Rise\Core\Routing\Router;
-use App\Api\Models\User;
 
 RouteLinker::linkRoutes();
 
 $finalizedRoute;
 
-$routeURI = Router::$routes[$_SERVER["REQUEST_URI"]] ?? null;
+$routeOutput = [];
+
+$URICheck = explode("/", $_SERVER["REQUEST_URI"]);
+
+unset($URICheck[0]);
+
+foreach($URICheck as $key => $uriSplit) {
+    if (!isset($uriSplit) || strlen($uriSplit > 0) && $uriSplit[0] !== "[") {continue;}
+    $subSplit = substr($uriSplit, 1, -1);
+    if (is_numeric($subSplit)) {
+        $URICheck[$key] = "[int]";
+        $routeOutput[] = (int) $subSplit;
+    } else {
+        $URICheck[$key] = "[str]";
+        $routeOutput[] = $subSplit;
+    }
+}
+
+$routeURI = Router::$routes["/" . implode("/", $URICheck)] ?? null;
 
 if ($routeURI) {
     $finalizedRoute = $routeURI[$_SERVER["REQUEST_METHOD"]] ?? null;
@@ -35,4 +52,24 @@ if (!$finalizedRoute) {
 $controller = new $finalizedRoute[0];
 $method = $finalizedRoute[1];
 
-echo call_user_func([$controller, $method], (User::create(["name" => "Aleksis", "password" => "my_very_secure_password", "coins" => 0])));
+$reflectionMethod = new ReflectionMethod($controller, $method);
+$params = $reflectionMethod->getParameters();
+
+foreach ($params as $key => $param) {
+    $type = $param->getType();
+
+    if (!$type instanceof ReflectionNamedType || $type->isBuiltin()) {
+        continue;
+    }
+
+    $className = $type->getName();
+
+    $reflection = new ReflectionClass($className);
+    $constructor = $reflection->getConstructor();
+
+    if (!isset($constructor)) {continue;}
+
+    $routeOutput[$key] = new $className($routeOutput[$key]);
+}
+
+echo call_user_func([$controller, $method], ...$routeOutput);
