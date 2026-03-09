@@ -31,6 +31,16 @@ class TableConstructor {
         return $this;
     }
 
+    public function timestamp(?string $name = null, ?int $precision = null) {
+        if (!isset($name)) {
+            $this->tableQuery[] = "created_at DATETIME";
+            $this->tableQuery[] = "updated_at DATETIME";
+        } else {
+            $precision = $precision ? "({$precision})" : "";
+            $this->tableQuery[] = "{$name} DATETIME{$precision}";
+        }
+    }
+
     public function __call(string $name, array $args) {
         $str = implode(" ", array_slice($args, 1));
         if ($str !== "") {

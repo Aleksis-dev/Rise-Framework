@@ -54,8 +54,18 @@ class Model extends stdClass {
             $data["password"] = password_hash($data["password"], PASSWORD_ARGON2ID);
         }
 
-        $valueNames = implode(",", array_keys($data));
+        $specials = [];
+
+        if (!isset($initializedObject->timestamps) || isset($initializedObject->timestamps) && $initializedObject->timestamps !== false) {
+            $specials["created_at"] = $specials["updated_at"] = "UTC_TIMESTAMP()";
+        }
+
         $placeholders = ":" . implode(",:", array_keys($data));
+
+        $placeholders = $placeholders . "," . implode(",", $specials);
+
+        $valueNames = implode(",", array_keys($data));
+        $valueNames = $valueNames . "," . implode(",", array_keys($specials));
 
         $className = strtolower(basename($class));
 
@@ -86,6 +96,12 @@ class Model extends stdClass {
             http_response_code(500);
             exit(1);
         }
+
+        $createdAt = $initializedObject->created_at;
+        $updated_at = $initializedObject->updated_at;
+
+        $initializedObject->created_at = $createdAt ? str_replace(" ", "T", $createdAt) . "Z" : null;
+        $initializedObject->updated_at = $updated_at ? str_replace(" ", "T", $updated_at) . "Z" : null;
 
         return $initializedObject;
     }
