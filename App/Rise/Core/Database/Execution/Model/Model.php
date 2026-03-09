@@ -16,6 +16,44 @@ class Model extends stdClass {
         return $this->privateModel->{$name};
     }
 
+    public function __construct(?int $id = null) {
+        if (!isset($id)) {return $this;}
+        $dbh = new PDOEntry()->dbh;
+
+        $class = get_called_class();
+
+        $className = strtolower(basename($class));
+
+        $table = "{$className}_table";
+
+        $tablePrimaryKey = "{$className}_id";
+
+        $stmt = "SELECT * FROM {$table} WHERE {$tablePrimaryKey} = {$id}";
+
+        $queryResponse = QueryExecutor::execute($dbh, $stmt, $this);
+
+        self::sanitize($this    );
+
+        return $this;
+    }
+
+    private static function sanitize(object $initializedObject) {
+        $createdAt = $initializedObject->created_at;
+        $updated_at = $initializedObject->updated_at;
+
+        $initializedObject->created_at = $createdAt ? str_replace(" ", "T", $createdAt) . "Z" : null;
+        $initializedObject->updated_at = $updated_at ? str_replace(" ", "T", $updated_at) . "Z" : null;
+
+        $initializedObject->privateModel = new StdClass();
+
+        foreach ($initializedObject->hidden as $hidden) {
+            if (isset($initializedObject->{$hidden})) {
+                $initializedObject->privateModel->{$hidden} = $initializedObject->{$hidden};
+                unset($initializedObject->{$hidden});
+            }
+        }
+    }
+
     public static function all() {
         $class = get_called_class();
 
@@ -104,20 +142,7 @@ class Model extends stdClass {
             exit(1);
         }
 
-        $createdAt = $initializedObject->created_at;
-        $updated_at = $initializedObject->updated_at;
-
-        $initializedObject->created_at = $createdAt ? str_replace(" ", "T", $createdAt) . "Z" : null;
-        $initializedObject->updated_at = $updated_at ? str_replace(" ", "T", $updated_at) . "Z" : null;
-
-        $initializedObject->privateModel = new StdClass();
-
-        foreach ($initializedObject->hidden as $hidden) {
-            if (isset($initializedObject->{$hidden})) {
-                $initializedObject->privateModel->{$hidden} = $initializedObject->{$hidden};
-                unset($initializedObject->{$hidden});
-            }
-        }
+        self::sanitize($initializedObject);
 
         return $initializedObject;
     }

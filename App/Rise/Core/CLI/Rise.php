@@ -71,9 +71,9 @@ class Rise {
     }
 
     public function serve() {
-        $file = dirname($this->defaultDir) . '/Public/Index.php';
+        $file = dirname($this->defaultDir) . '/Public';
 
-        shell_exec("php -S localhost:8000 {$file}");
+        shell_exec("php -S localhost:8000 -t {$file}");
     }
 
     public function __call(string $name, array $args) {

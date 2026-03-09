@@ -11,9 +11,27 @@ class TestController {
         ]);
     }
 
-    public function user(User $user) {
+    public function user() {
+
+        $user = User::create([
+            "name" => "Aleksis",
+            "password" => "very_secret_password",
+            "coins" => 0
+        ]);
+
+        $user->createToken();
+
         return json_encode([
-            "user" => $user
+            "user" => $user,
+            "token" => $user->token()
+        ]);
+    }
+
+    public function userInfo(User $user, int $postId) {
+        return json_encode([
+            "user" => $user,
+            "post_id" => $postId,
+            "token" => $user->token()
         ]);
     }
 
