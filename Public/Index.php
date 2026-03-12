@@ -72,4 +72,10 @@ foreach ($params as $key => $param) {
     $routeOutput[$key] = new $className($routeOutput[$key]);
 }
 
+$middleware = $finalizedRoute["middleware"];
+
+echo json_encode([
+    "middleware" => $middleware
+]);
+
 echo call_user_func([$controller, $method], ...$routeOutput);

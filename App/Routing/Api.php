@@ -10,3 +10,7 @@ Router::get("/info", [TestController::class, "info"]);
 Router::post("/user", [TestController::class, "user"]);
 Router::get("/user/[int]/post/[int]", [TestController::class, "userInfo"]);
 Router::get("/user/info", [TestController::class, "info"]);
+
+Router::middleware(["default"])->group(function () {
+    Router::get("/info", [TestController::class, "info"]);
+});

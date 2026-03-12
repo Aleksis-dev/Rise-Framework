@@ -15,7 +15,15 @@ class SchemaPlanner {
 
         $str = str_replace("[name]", $tableName . "_id", $str);
 
-        return "CREATE TABLE {$tableName}_table " . "(\n" . $str . ")";
+        $stmt = "CREATE TABLE {$tableName}_table " . "(\n" . $str . ");";
+
+        $str = "\n" . implode("\n", $table->getSpecialQueries());
+
+        $str = str_replace("[table]", "{$tableName}_table", $str);
+
+        $stmt = $stmt . $str;
+
+        return $stmt;
     }  
 
     public static function dropTable(string $tableName) {

@@ -4,6 +4,7 @@ namespace App\Rise\Core\Database\Table;
 
 class TableConstructor {
     private array $tableQuery = [];
+    private array $specialQueries = [];
 
     public function foreign(string $key) {
         $this->tableQuery[] = "FOREIGN KEY " . "($key) ";
@@ -44,6 +45,7 @@ class TableConstructor {
     public function morph(string $name) {
         $this->tableQuery[] = "{$name}_type VARCHAR(255)";
         $this->tableQuery[] = "{$name}_id BIGINT UNSIGNED";
+        $this->specialQueries[] = "CREATE INDEX index_{$name}_morph ON [table] ({$name}_type, {$name}_id)";
         return $this;
     }
 
@@ -58,5 +60,9 @@ class TableConstructor {
 
     public function getQuery() {
         return $this->tableQuery;
+    }
+
+    public function getSpecialQueries() {
+        return $this->specialQueries;
     }
 }
