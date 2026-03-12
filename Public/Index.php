@@ -5,9 +5,12 @@ header('Content-Type: application/json');
 require_once dirname(__DIR__) . "/App/autoload/Autoloader.php";
 
 use App\Config\RouteLinker;
+use App\Config\MiddlewareLinker;
 use App\Rise\Core\Routing\Router;
+use App\Rise\Core\Authorization\Middleware;
 
 RouteLinker::linkRoutes();
+MiddlewareLinker::linkMiddleware();
 
 $finalizedRoute;
 
@@ -72,10 +75,24 @@ foreach ($params as $key => $param) {
     $routeOutput[$key] = new $className($routeOutput[$key]);
 }
 
-$middleware = $finalizedRoute["middleware"];
+$middlewares = $finalizedRoute["middleware"];
+$token;
 
-echo json_encode([
-    "middleware" => $middleware
-]);
+if ($middlewares !== []) {
+    if (!isset(getallheaders()["Authorization"])) {
+        http_response_code(401);
+
+        echo json_encode([
+            "message" => "Unauthorized!"
+        ]);
+
+        exit(1);
+    }
+    $token = explode(" ", getallheaders()["Authorization"])[1];
+}
+
+foreach ($middlewares as $middleware) {
+    Middleware::$middlewares[$middleware]($token);   
+}
 
 echo call_user_func([$controller, $method], ...$routeOutput);

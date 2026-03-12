@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Rise\Core\Authorization;
+
 use App\Rise\Core\Database\Execution\PDO\PDOEntry;
 use App\Rise\Core\Database\Execution\Queries\QueryExecutor;
 use stdClass;
