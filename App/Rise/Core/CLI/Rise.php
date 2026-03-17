@@ -93,10 +93,22 @@ class Rise {
         //file_put_contents($file, $fileContents);
     }
 
+    protected function processTemplate(string $templateName, array $replaceData, string $placeDir) {
+        $template = $this->readTemplate($templateName);
+        $template = str_replace(array_keys($replaceData), array_values($replaceData), $template);
+
+        file_put_contents($placeDir, $template);
+    }
+
+
+    public function createAll(string $name) {
+        $this->createController($name);
+        $this->createModel($name);
+        $this->createMigration($name);
+    }
+
     public function createController(string $name) {
         $nameUCFirst = ucfirst($name);
-        $template = $this->readTemplate("CONTROLLER_TEMPLATE");
-
         $placeDir = $this->defaultDir . "/Api/Controllers/{$nameUCFirst}Controller.php";
 
         $replaceData = [
@@ -108,8 +120,34 @@ class Rise {
             "[CONTROLLER_OBJECT_NAME_CAMEL_CASE]" => "{$name}"
         ];
 
-        $template = str_replace(array_keys($replaceData), array_values($replaceData), $template);
+        $this->processTemplate("CONTROLLER_TEMPLATE", $replaceData, $placeDir);
+    }
 
-        file_put_contents($placeDir, $template);
+    public function createModel(string $name) {
+        $nameUCFirst = ucfirst($name);
+
+        $placeDir = $this->defaultDir . "/Api/Models/{$nameUCFirst}.php";
+
+        $traits = [];
+
+        $replaceData = [
+            "[DEPENDENCIES]" => implode("\n", []),
+            "[MODEL_NAME]" => "{$nameUCFirst}",
+            "[TRAITS]" => ($traits !== [] ? "use " : "") . implode(", ", $traits) . ($traits !== [] ? ";" : "")
+        ];
+
+        $this->processTemplate("MODEL_TEMPLATE", $replaceData, $placeDir);
+    }
+
+    public function createMigration(string $name) {
+        $migrationName = "{$name}_migration_" . date("d_m_y");
+        $placeDir = $this->defaultDir . "/Database/Migrations/{$migrationName}.php";
+
+        $replaceData = [
+            "[MIGRATION_NAME]" => "{$migrationName}",
+            "[MIGRATION_MODEL]" => "\"{$name}\""
+        ];
+
+        $this->processTemplate("MIGRATION_TEMPLATE", $replaceData, $placeDir);
     }
 }

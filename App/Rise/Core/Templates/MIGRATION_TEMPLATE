@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use App\Rise\Core\Database\Schema\SchemaPlanner;
+use App\Rise\Core\Database\Table\TableConstructor;
+
+class [MIGRATION_NAME] {
+    public function up(): string {
+        return SchemaPlanner::createTable([MIGRATION_MODEL], function(TableConstructor $table) {
+            $table->id();
+            $table->timestamp();
+        });
+    }
+
+    public function down(): string {
+        return SchemaPlanner::dropTable([MIGRATION_MODEL]);
+    }
+}

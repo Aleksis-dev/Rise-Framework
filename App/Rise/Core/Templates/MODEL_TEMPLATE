@@ -1,0 +1,10 @@
+<?php
+
+namespace App\Api\Models;
+
+use App\Rise\Core\Database\Execution\Model\Model;
+[DEPENDENCIES]
+
+class [MODEL_NAME] extends Model {
+    [TRAITS]
+}
