@@ -80,4 +80,36 @@ class Rise {
         echo "$name command not found! (use php rise help)";
         exit(1);
     }
+
+    protected function readTemplate(string $fileName) {
+        $templateDir = $this->defaultDir . "/Rise/Core/Templates";
+        $file = $templateDir . "/{$fileName}";
+        return file_get_contents($file);
+
+        //$dependencies = "use App\\Api\\Models\\User;";
+//
+        //$fileContents = str_replace("[DEPENDENCIES];", $dependencies, $fileContents);
+        //
+        //file_put_contents($file, $fileContents);
+    }
+
+    public function createController(string $name) {
+        $nameUCFirst = ucfirst($name);
+        $template = $this->readTemplate("CONTROLLER_TEMPLATE");
+
+        $placeDir = $this->defaultDir . "/Api/Controllers/{$nameUCFirst}Controller.php";
+
+        $replaceData = [
+            "[DEPENDENCIES]" => implode("\n", [
+                "use App\\Api\\Models\\{$nameUCFirst};",
+            ]),
+            "[CONTROLLER_NAME]" => "{$nameUCFirst}Controller",
+            "[CONTROLLER_OBJECT_NAME]" => "{$nameUCFirst}",
+            "[CONTROLLER_OBJECT_NAME_CAMEL_CASE]" => "{$name}"
+        ];
+
+        $template = str_replace(array_keys($replaceData), array_values($replaceData), $template);
+
+        file_put_contents($placeDir, $template);
+    }
 }

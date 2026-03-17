@@ -10,4 +10,14 @@ if ($argc-1 == 0) {
     exit(0);
 }
 
-call_user_func([$rise, $argv[1]], (array_slice($argv, 2)));
+$splitArg = explode(":", $argv[1]);
+
+if (count($splitArg) >= 2) {
+    $splitArg[1] = ucfirst($splitArg[1]);
+}
+
+$argv[1] = implode("", $splitArg);
+
+$args = array_slice($argv, 2);
+
+$rise->{$argv[1]}(...$args);

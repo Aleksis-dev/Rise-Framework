@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Api\Controllers;
+
+[DEPENDENCIES]
+
+class [CONTROLLER_NAME] {
+    public function index() {
+
+    }
+
+    public function store(Request $request) {
+
+    }
+
+    public function show([CONTROLLER_OBJECT_NAME] $[CONTROLLER_OBJECT_NAME_CAMEL_CASE]) {
+
+    }
+
+    public function update(Request $request, [CONTROLLER_OBJECT_NAME] $[CONTROLLER_OBJECT_NAME_CAMEL_CASE]) {
+
+    }
+
+    public function destroy([CONTROLLER_OBJECT_NAME] $[CONTROLLER_OBJECT_NAME_CAMEL_CASE]) {
+        
+    }
+}
