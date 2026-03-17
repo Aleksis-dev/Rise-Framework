@@ -10,7 +10,8 @@ class access_tokens_03_09_2026 {
         return SchemaPlanner::createTable("access_tokens", function (TableConstructor $table) {
             $table->id()
             ->morph("tokenable")
-            ->tinytext("token");
+            ->tinytext("token")
+            ->timestamp();
         });
     }
 
