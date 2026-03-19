@@ -6,6 +6,7 @@ use App\Rise\Core\Helpers\Files\Searching\SearchFile;
 use App\Rise\Core\Database\Execution\PDO\PDOEntry;
 use App\Rise\Core\Database\Execution\Queries\QueryExecutor;
 use App\Rise\Core\Database\Execution\PDO\PDOConnection;
+use App\env;
 
 class Rise {
     private string $defaultDir;
@@ -13,7 +14,10 @@ class Rise {
 
     public function __construct() {
         $this->defaultDir = new SearchFile("")->search();
-        $this->dbh = new PDOEntry()->dbh;
+        $pdoEntry = new PDOEntry();
+        if (isset($pdoEntry->dbh)) {
+            $this->dbh = new PDOEntry()->dbh;
+        }
     }
 
     public function migrate() {
@@ -144,5 +148,10 @@ class Rise {
         ];
 
         $this->processTemplate("MIGRATION_TEMPLATE", $replaceData, $placeDir);
+    }
+
+    public function createEnv() {
+        $env = env::createEnv();
+        echo $env;
     }
 }

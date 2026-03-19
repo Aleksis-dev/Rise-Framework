@@ -5,10 +5,13 @@ use stdClass;
 
 class env extends stdClass {
     public function __construct() {
-        $envConfs = explode("\n", file_get_contents(dirname(__DIR__) . "/.env"));
+        $path = dirname(__DIR__) . "/.env";
+        if (!file_exists($path)) {return;}
+
+        $envConfs = explode("\n", file_get_contents($path));
 
         foreach ($envConfs as $key => $envConf) {
-            if ($envConf[0] == "#") {
+            if (isset($envConf[0]) && $envConf[0] == "#") {
                 continue;
             }
 
@@ -22,7 +25,8 @@ class env extends stdClass {
         }
     }
 
-    public function createEnv() {
-        
+    public static function createEnv() {
+        $envTemplate = file_get_contents(dirname(__DIR__) . "/App/Rise/Core/Templates/ENV_TEMPLATE");
+        file_put_contents(dirname(__DIR__) . "/.env", $envTemplate);
     }
 };
