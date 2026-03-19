@@ -30,11 +30,13 @@ class Model extends stdClass {
 
         $stmt = "SELECT * FROM {$table} WHERE {$tablePrimaryKey} = {$id}";
 
-        $queryResponse = QueryExecutor::execute($dbh, $stmt, $this);
+        $queryResponse = QueryExecutor::execute($dbh, $stmt, $class, true);
 
-        self::sanitize($this    );
+        foreach (get_object_vars($queryResponse["result"]) as $key => $value) {
+            $this->{$key} = $value;
+        }
 
-        return $this;
+        self::sanitize($this);
     }
 
     private static function sanitize(object $initializedObject) {
@@ -65,12 +67,16 @@ class Model extends stdClass {
 
         $dbh = new PDOEntry()->dbh;
 
-        $queryResponse = QueryExecutor::execute($dbh, $stmt);
+        $queryResponse = QueryExecutor::execute($dbh, $stmt, $class);
 
         if (isset($queryResponse["error"])) {
             echo json_encode($queryResponse["error"]);
             http_response_code(500);
             exit(1);
+        }
+
+        foreach ($queryResponse["result"] as $obj) {
+            self::sanitize($obj);
         }
 
         return $queryResponse["result"];
@@ -120,7 +126,7 @@ class Model extends stdClass {
 
         $dbh = new PDOEntry()->dbh;
 
-        $queryResponse = QueryExecutor::execute($dbh, $stmt, null, $data);
+        $queryResponse = QueryExecutor::execute($dbh, $stmt, null, false, $data);
 
         if (isset($queryResponse["error"])) {
             echo json_encode($queryResponse["error"]);
@@ -134,7 +140,7 @@ class Model extends stdClass {
 
         $stmt = "SELECT * FROM {$table} WHERE {$id} = {$lastInsertId}";
 
-        $queryResponse = QueryExecutor::execute($dbh, $stmt, $initializedObject);
+        $queryResponse = QueryExecutor::execute($dbh, $stmt, $class, true);
 
         if (isset($queryResponse["error"])) {
             echo json_encode($queryResponse["error"]);
@@ -142,8 +148,8 @@ class Model extends stdClass {
             exit(1);
         }
 
-        self::sanitize($initializedObject);
+        self::sanitize($queryResponse["result"]);
 
-        return $initializedObject;
+        return $queryResponse["result"];
     }
 }

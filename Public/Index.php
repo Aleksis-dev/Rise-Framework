@@ -8,6 +8,8 @@ use App\Config\RouteLinker;
 use App\Config\MiddlewareLinker;
 use App\Rise\Core\Routing\Router;
 use App\Rise\Core\Authorization\Middleware;
+use App\Rise\Core\Requests\Request;
+use App\Rise\Core\Helpers\Responses\Response;
 
 RouteLinker::linkRoutes();
 MiddlewareLinker::linkMiddleware();
@@ -18,10 +20,8 @@ $routeOutput = [];
 
 $URICheck = explode("/", $_SERVER["REQUEST_URI"]);
 
-unset($URICheck[0]);
-
 foreach($URICheck as $key => $uriSplit) {
-    if (!isset($uriSplit) || strlen($uriSplit > 0) && $uriSplit[0] !== "[") {continue;}
+    if (!isset($uriSplit) || strlen($uriSplit) >= 0 && !isset($uriSplit[0]) || $uriSplit[0] !== "[") {continue;}
     $subSplit = substr($uriSplit, 1, -1);
     if (is_numeric($subSplit)) {
         $URICheck[$key] = "[int]";
@@ -32,7 +32,7 @@ foreach($URICheck as $key => $uriSplit) {
     }
 }
 
-$routeURI = Router::$routes["/" . implode("/", $URICheck)] ?? null;
+$routeURI = Router::$routes[implode("/", $URICheck)] ?? null;
 
 if ($routeURI) {
     $finalizedRoute = $routeURI[$_SERVER["REQUEST_METHOD"]] ?? null;
@@ -61,7 +61,17 @@ $params = $reflectionMethod->getParameters();
 foreach ($params as $key => $param) {
     $type = $param->getType();
 
+    $baseType = basename($type);
+
     if (!$type instanceof ReflectionNamedType || $type->isBuiltin()) {
+        continue;
+    }
+
+    if ($baseType === "Request") {
+        $body = file_get_contents('php://input');
+        $body = json_decode($body);
+
+        $routeOutput[$key] = new Request((array) $body);
         continue;
     }
 
@@ -89,6 +99,10 @@ if ($middlewares !== []) {
         exit(1);
     }
     $token = explode(" ", getallheaders()["Authorization"])[1];
+}
+
+function response(array $data, int $responseCode = 200) {
+    return new Response($data, $responseCode);
 }
 
 foreach ($middlewares as $middleware) {

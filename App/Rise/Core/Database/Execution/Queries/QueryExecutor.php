@@ -14,10 +14,13 @@ class QueryExecutor {
             $sth = $dbh->prepare($stmt);
             $sth->execute();
             $result["result"] = $sth->fetchAll();
+
             if (strtok($stmt, " ") == "INSERT") {
                 $result["lastInsertId"] = $dbh->lastInsertId();
             }
+
             return $result;
+            
         } catch (PDOException $e) {
             $result["error"] = ["error" => $e->getMessage()];
         }
@@ -25,26 +28,37 @@ class QueryExecutor {
         return $result;
     }
 
-    public static function execute(PDOConnection $dbh, string $stmt, ?object $infusedObject = null, array $data = []) {
+    public static function execute(PDOConnection $dbh, string $stmt, ?string $className = null, bool $single = false, array $data = []) {
         try {
             $dbh->beginTransaction();
             $sth = $dbh->prepare($stmt);
             $sth->execute($data);
-            if (isset($infusedObject)) {
-                $sth->setFetchMode(PDO::FETCH_INTO, $infusedObject);
-                $result["result"] = $sth->fetch();
+
+            if (isset($className)) {
+                if ($single) {
+                    $result["result"] = $sth->fetchObject($className);
+                } else {
+                    $result["result"] = $sth->fetchAll(PDO::FETCH_CLASS, $className);
+                }
             } else {
-                $result["result"] = $sth->fetchAll();
+                $result["result"] = $single
+                ? $sth->fetch(PDO::FETCH_ASSOC)
+                : $sth->fetchAll(PDO::FETCH_ASSOC);
             }
+
             if (strtok($stmt, " ") == "INSERT") {
                 $result["lastInsertId"] = $dbh->lastInsertId();
             }
+
             $dbh->commit();
+
             return $result;
+
         } catch (PDOException $e) {
             if ($dbh->inTransaction()) {
                 $dbh->rollBack();
             }
+
             $result["error"] = ["error" => $e->getMessage()];
         }
 

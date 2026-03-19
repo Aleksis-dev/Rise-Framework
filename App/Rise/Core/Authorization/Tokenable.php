@@ -27,13 +27,14 @@ trait Tokenable {
 
         $dbh = PDOEntry::callOnce();
 
-        QueryExecutor::execute($dbh, $stmt, null, $data);
+        QueryExecutor::execute($dbh, $stmt, null, false, $data);
 
         return $this;
     }
 
     protected function fetchToken() {
-        $className = strtolower(basename(get_class($this)));
+        $class = get_class($this);
+        $className = strtolower(basename($class));
 
         $id = $this->{"{$className}_id"};
 
@@ -44,11 +45,11 @@ trait Tokenable {
 
         $dbh = PDOEntry::callOnce();
 
-        $infusedObj = new StdClass();
+        $response = QueryExecutor::execute($dbh, $stmt, stdClass::class, true, $data);
 
-        QueryExecutor::execute($dbh, $stmt, $infusedObj, $data);
+        $token = $response["result"]->token;
 
-        return "{$id}|{$infusedObj->token}";
+        return "{$id}|{$token}";
     }
 
     public function token() {

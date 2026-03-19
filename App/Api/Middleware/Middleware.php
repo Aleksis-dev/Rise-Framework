@@ -10,11 +10,9 @@ Middleware::register("default", function(string $token) {
     $arr = (array)$result["result"][0];
 
     if (!reset($arr)) {
-        http_response_code(401);
-
-        echo json_encode([
+        echo response([
             "message" => "Unauthorized!"
-        ]);
+        ], 401);
 
         exit(1);
     }

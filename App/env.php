@@ -21,4 +21,8 @@ class env extends stdClass {
             $this->{trim($arr[0])} = trim($arr[1]);
         }
     }
+
+    public function createEnv() {
+        
+    }
 };

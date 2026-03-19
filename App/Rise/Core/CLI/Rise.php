@@ -85,12 +85,6 @@ class Rise {
         $templateDir = $this->defaultDir . "/Rise/Core/Templates";
         $file = $templateDir . "/{$fileName}";
         return file_get_contents($file);
-
-        //$dependencies = "use App\\Api\\Models\\User;";
-//
-        //$fileContents = str_replace("[DEPENDENCIES];", $dependencies, $fileContents);
-        //
-        //file_put_contents($file, $fileContents);
     }
 
     protected function processTemplate(string $templateName, array $replaceData, string $placeDir) {
@@ -114,6 +108,7 @@ class Rise {
         $replaceData = [
             "[DEPENDENCIES]" => implode("\n", [
                 "use App\\Api\\Models\\{$nameUCFirst};",
+                "use App\\Rise\\Core\\Requests\\Request;"
             ]),
             "[CONTROLLER_NAME]" => "{$nameUCFirst}Controller",
             "[CONTROLLER_OBJECT_NAME]" => "{$nameUCFirst}",

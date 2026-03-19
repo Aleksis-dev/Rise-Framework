@@ -39,7 +39,7 @@ class Middleware {
 
         $dbh = PDOEntry::callOnce();
 
-        $result = QueryExecutor::execute($dbh, $stmt, null, $data);
+        $result = QueryExecutor::execute($dbh, $stmt, null, false, $data);
 
         return $result;
     }
